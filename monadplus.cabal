@@ -1,7 +1,7 @@
 
 name:               monadplus
-version:            0.5
-cabal-version:      >= 1.2
+version:            1.0
+cabal-version:      >= 1.6
 author:             Hans Hoglund
 maintainer:         Hans Hoglund <hans@hanshoglund.se>
 license:            BSD3
