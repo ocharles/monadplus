@@ -1,13 +1,13 @@
 
 name:               monadplus
-version:            1.0
+version:            1.2
 cabal-version:      >= 1.6
 author:             Hans Hoglund
 maintainer:         Hans Hoglund <hans@hanshoglund.se>
 license:            BSD3
 license-file:       COPYING
-synopsis:           To be written.
-category:           Music
+synopsis:           Filtering and folding over arbitrary MonadPlus instances.
+category:           Control
 tested-with:        GHC
 build-type:         Simple
 
