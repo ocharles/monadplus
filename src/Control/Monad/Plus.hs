@@ -13,7 +13,7 @@
 --
 -- This is especially useful for sequential structures such as event lists, tracks etc.
 --
--- Inspired by the Conal Elliott's blog post:
+-- Inspired by the following blog post:
 --
 --    * <http://conal.net/blog/posts/a-handy-generalized-filter>
 --
