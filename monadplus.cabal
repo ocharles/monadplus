@@ -1,6 +1,6 @@
 
 name:               monadplus
-version:            1.3
+version:            1.4
 cabal-version:      >= 1.10
 author:             Hans Hoglund
 maintainer:         Hans Hoglund <hans@hanshoglund.se>

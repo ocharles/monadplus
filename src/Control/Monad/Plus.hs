@@ -1,4 +1,9 @@
 
+{-# LANGUAGE DeriveFunctor, DeriveFoldable, GeneralizedNewtypeDeriving,
+
+    TypeSynonymInstances
+    #-}
+
 -------------------------------------------------------------------------------------
 -- |
 -- Copyright   : (c) Hans Hoglund 2012
@@ -33,7 +38,7 @@ module Control.Monad.Plus (
         mfromMaybe,
 
         -- * Filtering
-        mfilter,
+        -- mfilter,
         mpartition,
 
         -- ** Special filters
@@ -49,6 +54,7 @@ module Control.Monad.Plus (
         mconcatMap,
         
         -- * Utility
+        Partial(..),
         partial,
         predicate,
         always,
@@ -56,6 +62,8 @@ module Control.Monad.Plus (
   ) where
 
 import Control.Monad hiding (msum)
+import Control.Applicative
+import Data.Monoid
 import Data.List (partition)
 import Data.Maybe (listToMaybe, maybeToList, catMaybes, mapMaybe, fromMaybe)
 import Data.Either (lefts, rights, partitionEithers)
@@ -185,14 +193,11 @@ mmapRights f = mrights . liftM f
 
 -}
 
-
 -- |
 -- Convert a predicate to a partial function.
 --
 partial :: (a -> Bool) -> a -> Maybe a
-partial p x = case p x of
-    True  -> Just x
-    False -> Nothing
+partial p x = if p x then Just x else Nothing
 
 -- |
 -- Convert a partial function to a predicate.
@@ -205,12 +210,40 @@ predicate f x = case f x of
 -- |
 -- Convert a total function to a partial function.
 --  
-always :: (a -> b) -> (a -> Maybe b)
+always :: (a -> b) -> a -> Maybe b
 always f = Just . f
 
 -- |
 -- Make a partial function that always rejects its input.
 --  
-never :: (a -> b) -> (a -> Maybe c)
-never f = const Nothing
+never :: a -> Maybe c
+never = const Nothing
 
+-- |
+-- Wrapper for partial functions with 'MonadPlus' instance.
+--
+newtype Partial a b = Partial { getPartial :: a -> Maybe b }
+    
+instance Functor (Partial r) where
+    fmap f (Partial g) = Partial (fmap f . g)
+
+instance Monad (Partial r) where
+    return x = Partial (\_ -> Just x)
+    Partial f >>= k = Partial $ \r -> f r >>= \x -> getPartial (k x) r
+
+instance MonadPlus (Partial r) where
+    mzero = Partial (const Nothing)
+    Partial f `mplus` Partial g = Partial $ \x -> f x `mplus` g x
+
+instance Applicative (Partial r) where
+    pure x = Partial (\_ -> Just x)
+    Partial f <*> Partial g = Partial $ \x -> f x <*> g x
+
+instance Alternative (Partial r) where
+    empty = Partial (const Nothing)
+    Partial f <|> Partial g = Partial $ \x -> f x <|> g x
+
+instance Monoid (Partial a b) where
+    mempty  = mzero
+    mappend = mplus
+    
