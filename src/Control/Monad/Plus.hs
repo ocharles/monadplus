@@ -229,7 +229,10 @@ instance Functor (Partial r) where
 
 instance Monad (Partial r) where
     return x = Partial (\_ -> Just x)
-    Partial f >>= k = Partial $ \r -> f r >>= \x -> getPartial (k x) r
+    Partial f >>= k = Partial $ \r -> do { x <- f r; getPartial (k x) r }
+    -- f >>= k = (join' . fmap k) f
+        -- where
+            -- join' g = Partial $ \x -> do { h <- getPartial g x; getPartial h x }
 
 instance MonadPlus (Partial r) where
     mzero = Partial (const Nothing)
