@@ -1,8 +1,5 @@
 
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, GeneralizedNewtypeDeriving,
-
-    TypeSynonymInstances
-    #-}
+{-# LANGUAGE DeriveFunctor, DeriveFoldable, GeneralizedNewtypeDeriving #-}
 
 -------------------------------------------------------------------------------------
 -- |
