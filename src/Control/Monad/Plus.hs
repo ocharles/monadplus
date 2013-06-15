@@ -9,7 +9,9 @@
 -- Stability   : experimental
 -- Portability : non-portable (TF,GNTD)
 --
--- Partial maps and filters over 'MonadPlus' instances.
+-- Partial maps and filters over 'MonadPlus' instances. The basic idea here is that
+-- the monad interface together with the monoidal structure of 'MonadPlus' is enough
+-- to implement partial maps and filters (i.e. 'mmapMaybe' and 'mfilter').
 --
 -- This is especially useful for sequential structures such as event lists, tracks etc.
 --
@@ -22,7 +24,7 @@
 module Control.Monad.Plus (
         -- * Basics
         module Control.Monad,
-        msum,
+        Monad.msum,
         msum',      
         
         -- * Constructing
@@ -31,7 +33,7 @@ module Control.Monad.Plus (
         mfromMaybe,
 
         -- * Filtering
-        mfilter',
+        mfilter,
         mpartition,
 
         -- ** Special filters
@@ -45,13 +47,20 @@ module Control.Monad.Plus (
         -- * Special maps
         mmapMaybe,
         mconcatMap,
+        
+        -- * Utility
+        partial,
+        predicate,
+        always,
+        never,
   ) where
 
-import Control.Monad
+import Control.Monad hiding (msum)
 import Data.List (partition)
-import Data.Maybe (listToMaybe, maybeToList, catMaybes, mapMaybe)
+import Data.Maybe (listToMaybe, maybeToList, catMaybes, mapMaybe, fromMaybe)
 import Data.Either (lefts, rights, partitionEithers)
 import Data.Foldable (Foldable(..), toList)
+import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable
 
 -- |
@@ -74,7 +83,7 @@ mfold = mfromList . Foldable.toList
 -- This function generalizes the 'listToMaybe' function.
 -- 
 mfromList :: MonadPlus m => [a] -> m a
-mfromList = msum . map return
+mfromList = Monad.msum . map return
 
 -- | 
 -- Translate maybe to an arbitrary 'MonadPlus' type.
@@ -83,18 +92,6 @@ mfromList = msum . map return
 -- 
 mfromMaybe :: MonadPlus m => Maybe a -> m a
 mfromMaybe = maybe mzero return
-
--- | 
--- 'mfilter'', applied to a predicate and a container, returns the container of
--- those elements that satisfy the predicate; i.e.,
---
--- > filter p xs = [ x | x <- xs, p x]
---
--- This function generalizes the 'filter' function.
--- (Identical to 'mfilter', it is just here for documentation purposes).
--- 
-mfilter' :: MonadPlus m => (a -> Bool) -> m a -> m a
-mfilter' = mfilter
 
 -- | 
 -- The 'partition' function takes a predicate a list and returns
@@ -109,7 +106,7 @@ mpartition :: MonadPlus m => (a -> Bool) -> m a -> (m a, m a)
 mpartition p a = (mfilter p a, mfilter (not . p) a)
 
 -- | 
--- Pass through @Just@ occurrences.
+-- Pass through @Just@ elements.
 -- 
 -- This function generalizes the 'catMaybes' function.
 -- 
@@ -117,7 +114,7 @@ mcatMaybes :: MonadPlus m => m (Maybe a) -> m a
 mcatMaybes = (>>= mfromMaybe)
 
 -- | 
--- Pass through @Just@ occurrences.
+-- Join list elements together.
 -- 
 -- This function generalizes the 'catMaybes' function.
 -- 
@@ -125,15 +122,15 @@ mscatter :: MonadPlus m => m [b] -> m b
 mscatter = (>>= mfromList)
 
 -- | 
--- Pass through @Just@ occurrences.
+-- Join foldable elements together.
 -- 
 -- This function generalizes the 'catMaybes' function.
 -- 
 mscatter' :: (MonadPlus m, Foldable t) => m (t b) -> m b
-mscatter' = (>>= mfromList . toList)
+mscatter' = (>>= mfold)
 
 -- | 
--- Pass through @Left@ occurrences.
+-- Pass through @Left@ elements.
 -- 
 -- This function generalizes the 'lefts' function.
 -- 
@@ -144,7 +141,7 @@ mlefts = mcatMaybes . liftM l
         l (Right a) = Nothing
 
 -- | 
--- Pass through @Right@ occurrences.
+-- Pass through @Right@ elements.
 -- 
 -- This function generalizes the 'rights' function.
 -- 
@@ -155,14 +152,12 @@ mrights = mcatMaybes . liftM r
         r (Right a) = Just a
 
 -- | 
--- Separate @Left@ and @Right@ occurances.
+-- Separate @Left@ and @Right@ elements.
 -- 
 -- This function generalizes the 'partitionEithers' function.
 -- 
 mpartitionEithers :: MonadPlus m => m (Either a b) -> (m a, m b)
 mpartitionEithers a = (mlefts a, mrights a)
-
-
 
 
 -- | 
@@ -174,7 +169,7 @@ mmapMaybe :: MonadPlus m => (a -> Maybe b) -> m a -> m b
 mmapMaybe f = mcatMaybes . liftM f
 
 -- | 
--- Modify and return a number of values.
+-- Modify, discard or spawn values.
 -- 
 -- This function generalizes the 'concatMap' function.
 -- 
@@ -187,6 +182,35 @@ mmapLefts f = mlefts . liftM f
 
 mmapRights :: MonadPlus m => (a -> Either c b) -> m a -> m b
 mmapRights f = mrights . liftM f
+
 -}
 
+
+-- |
+-- Convert a predicate to a partial function.
+--
+partial :: (a -> Bool) -> a -> Maybe a
+partial p x = case p x of
+    True  -> Just x
+    False -> Nothing
+
+-- |
+-- Convert a partial function to a predicate.
+--
+predicate :: (a -> Maybe a) -> a -> Bool
+predicate f x = case f x of
+    Just _  -> True
+    Nothing -> False
+
+-- |
+-- Convert a total function to a partial function.
+--  
+always :: (a -> b) -> (a -> Maybe b)
+always f = Just . f
+
+-- |
+-- Make a partial function that always rejects its input.
+--  
+never :: (a -> b) -> (a -> Maybe c)
+never f = const Nothing
 

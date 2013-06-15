@@ -19,40 +19,18 @@
 module Control.Applicative.Alternative (
         -- * Basics
         module Control.Applicative,
-        asum,
-        asum',      
+        Foldable.asum,
         
         -- * Constructing
         afold,
         afromList,
         afromMaybe,
-
-        -- -- * Filtering
-        -- afilter',
-        -- apartition,
-        -- 
-        -- -- ** Special filters
-        -- ascatter,
-        -- ascatter',
-        -- acatMaybes,
-        -- alefts,
-        -- arights,
-        -- apartitionEithers,
-        -- 
-        -- -- * Special maps
-        -- amapMaybe,
-        -- aconcatMap,
   ) where
 
 import Control.Applicative
-import Data.Foldable (Foldable(..), toList, asum)
-import qualified Data.Foldable as Foldable
+import Data.Foldable (Foldable(..))
 
--- |
--- This generalizes the list-based 'concat' function. 
--- 
-asum' :: (Alternative f, Foldable t) => t (f a) -> f a
-asum' = Foldable.asum
+import qualified Data.Foldable as Foldable
 
 -- | 
 -- Fold a value into an arbitrary 'MonadPlus' type.
@@ -66,7 +44,7 @@ afold = afromList . Foldable.toList
 -- This function generalizes the 'listToMaybe' function.
 -- 
 afromList :: Alternative f => [a] -> f a
-afromList = asum . map pure
+afromList = Foldable.asum . map pure
 
 -- | 
 -- Translate maybe to an arbitrary 'Alternative' type.
@@ -75,3 +53,4 @@ afromList = asum . map pure
 -- 
 afromMaybe :: Alternative f => Maybe a -> f a
 afromMaybe = maybe empty pure 
+
