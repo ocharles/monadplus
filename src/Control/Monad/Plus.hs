@@ -33,6 +33,7 @@ module Control.Monad.Plus (
         mfold,
         mfromList,
         mfromMaybe,
+        mreturn,
 
         -- * Filtering
         -- mfilter,
@@ -49,6 +50,7 @@ module Control.Monad.Plus (
         -- * Special maps
         mmapMaybe,
         mconcatMap,
+        mconcatMap',
         
         -- * Utility
         Partial(..),
@@ -97,6 +99,13 @@ mfromList = Monad.msum . map return
 -- 
 mfromMaybe :: MonadPlus m => Maybe a -> m a
 mfromMaybe = maybe mzero return
+
+-- | 
+-- Convert a partial function to a function returning an arbitrary
+-- 'MonadPlus' type.
+-- 
+mreturn :: MonadPlus m => (a -> Maybe b) -> a -> m b
+mreturn f = mfromMaybe . f
 
 -- | 
 -- The 'partition' function takes a predicate a list and returns
@@ -181,14 +190,15 @@ mmapMaybe f = mcatMaybes . liftM f
 mconcatMap :: MonadPlus m => (a -> [b]) -> m a -> m b
 mconcatMap f = mscatter . liftM f
 
-{-
-mmapLefts :: MonadPlus m => (a -> Either b c) -> m a -> m b
-mmapLefts f = mlefts . liftM f
+-- | 
+-- Modify, discard or spawn values.
+-- 
+-- This function generalizes the 'concatMap' function.
+-- 
+mconcatMap' :: (MonadPlus m, Foldable t) => (a -> t b) -> m a -> m b
+mconcatMap' f = mscatter' . liftM f
 
-mmapRights :: MonadPlus m => (a -> Either c b) -> m a -> m b
-mmapRights f = mrights . liftM f
 
--}
 
 -- |
 -- Convert a predicate to a partial function.
@@ -246,4 +256,5 @@ instance Alternative (Partial r) where
 instance Monoid (Partial a b) where
     mempty  = mzero
     mappend = mplus
-    
+
+
