@@ -61,7 +61,9 @@ module Control.Monad.Plus (
   ) where
 
 import Control.Monad hiding (msum)
-import Control.Applicative
+import Control.Applicative                   
+import Control.Category (Category)
+import qualified Control.Category as Category
 import Data.Monoid
 import Data.List (partition)
 import Data.Maybe (listToMaybe, maybeToList, catMaybes, mapMaybe, fromMaybe)
@@ -252,6 +254,12 @@ instance Applicative (Partial r) where
 instance Alternative (Partial r) where
     empty = Partial (const Nothing)
     Partial f <|> Partial g = Partial $ \x -> f x <|> g x
+
+instance Category Partial where
+    id  = Partial (always id)
+    Partial f . Partial g = Partial $ \x -> do
+        y <- g x
+        f y
 
 instance Monoid (Partial a b) where
     mempty  = mzero
