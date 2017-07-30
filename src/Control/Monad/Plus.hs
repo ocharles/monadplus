@@ -228,6 +228,14 @@ always f = Just . f
 never :: a -> Maybe c
 never = const Nothing
 
+infixr 1 $:
+
+-- |
+-- Apply an argument to a 'Partial'.
+--
+($:) :: Partial a b -> a -> Maybe b
+(Partial f) $: x = f x
+
 -- |
 -- Wrapper for partial functions with 'MonadPlus' instance.
 --
