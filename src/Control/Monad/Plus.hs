@@ -1,5 +1,5 @@
 
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE CPP, DeriveFunctor, DeriveFoldable, GeneralizedNewtypeDeriving #-}
 
 -------------------------------------------------------------------------------------
 -- |
@@ -261,8 +261,13 @@ instance Category Partial where
         y <- g x
         f y
 
+#if MIN_VERSION_base(4,11,0)
+instance Semigroup (Partial a b) where
+  (<>) = mplus
+#endif
+
 instance Monoid (Partial a b) where
     mempty  = mzero
+#if !MIN_VERSION_base(4,11,0)
     mappend = mplus
-
-
+#endif
