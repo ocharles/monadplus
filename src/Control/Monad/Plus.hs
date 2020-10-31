@@ -64,6 +64,7 @@ import Control.Monad hiding (msum)
 import Control.Applicative                   
 import Control.Category (Category)
 import qualified Control.Category as Category
+import Data.Semigroup as Sem
 import Data.Monoid
 import Data.List (partition)
 import Data.Maybe (listToMaybe, maybeToList, catMaybes, mapMaybe, fromMaybe)
@@ -261,8 +262,11 @@ instance Category Partial where
         y <- g x
         f y
 
+instance Sem.Semigroup (Partial a b) where
+    (<>) = mplus
+
 instance Monoid (Partial a b) where
     mempty  = mzero
-    mappend = mplus
+    mappend = (<>)
 
 
