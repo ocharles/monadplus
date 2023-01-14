@@ -20,7 +20,7 @@ module Control.Applicative.Alternative (
         -- * Basics
         module Control.Applicative,
         Foldable.asum,
-        
+
         -- * Constructing
         afold,
         afromList,
@@ -32,25 +32,24 @@ import Data.Foldable (Foldable(..))
 
 import qualified Data.Foldable as Foldable
 
--- | 
+-- |
 -- Fold a value into an arbitrary 'MonadPlus' type.
--- 
+--
 -- This function generalizes the 'toList' function.
--- 
+--
 afold :: (Alternative f, Foldable t) => t a -> f a
 afold = afromList . Foldable.toList
 
--- | 
+-- |
 -- This function generalizes the 'listToMaybe' function.
--- 
+--
 afromList :: Alternative f => [a] -> f a
 afromList = Foldable.asum . map pure
 
--- | 
+-- |
 -- Translate maybe to an arbitrary 'Alternative' type.
--- 
+--
 -- This function generalizes the 'maybeToList' function.
--- 
+--
 afromMaybe :: Alternative f => Maybe a -> f a
-afromMaybe = maybe empty pure 
-
+afromMaybe = maybe empty pure

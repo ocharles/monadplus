@@ -6,12 +6,12 @@ author:             Hans Hoglund
 maintainer:         Hans Hoglund <hans@hanshoglund.se>
 license:            BSD3
 license-file:       COPYING
-synopsis:           Haskell98 partial maps and filters over MonadPlus. 
+synopsis:           Haskell98 partial maps and filters over MonadPlus.
 category:           Control
 tested-with:        GHC
 build-type:         Simple
 
-description: 
+description:
     Filtering and folding over arbitrary `MonadPlus` instances.
 
     This package generalizes many common stream operations such as
@@ -20,13 +20,12 @@ description:
 source-repository head
   type:             git
   location:         git://github.com/hanshoglund/monadplus.git
-  
+
 library
     default-language: Haskell98
-    build-depends: 
+    build-depends:
         base >= 4 && < 5
     hs-source-dirs: src
     exposed-modules:
         Control.Applicative.Alternative
         Control.Monad.Plus
-    
