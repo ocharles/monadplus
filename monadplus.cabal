@@ -9,6 +9,8 @@ license-file:       COPYING
 synopsis:           Haskell98 partial maps and filters over MonadPlus.
 category:           Control
 build-type:         Simple
+extra-doc-files:
+    CHANGELOG.md
 
 description:
     Filtering and folding over arbitrary `MonadPlus` instances.
@@ -31,7 +33,7 @@ source-repository head
 
 library
     default-language: Haskell98
-    build-depends:
+    build-depends: 
         base >= 4.11 && < 5
     hs-source-dirs: src
     exposed-modules:
