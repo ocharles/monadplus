@@ -10,6 +10,8 @@ synopsis:           Haskell98 partial maps and filters over MonadPlus.
 category:           Control
 tested-with:        GHC
 build-type:         Simple
+extra-doc-files:
+    CHANGELOG.md
 
 description: 
     Filtering and folding over arbitrary `MonadPlus` instances.
