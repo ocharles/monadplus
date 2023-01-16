@@ -27,8 +27,8 @@ module Control.Monad.Plus (
         -- * Basics
         module Control.Monad,
         Monad.msum,
-        msum',      
-        
+        msum',
+
         -- * Constructing
         mfold,
         mfromList,
@@ -51,7 +51,7 @@ module Control.Monad.Plus (
         mmapMaybe,
         mconcatMap,
         mconcatMap',
-        
+
         -- * Utility
         Partial(..),
         partial,
@@ -61,7 +61,7 @@ module Control.Monad.Plus (
   ) where
 
 import Control.Monad hiding (msum)
-import Control.Applicative                   
+import Control.Applicative
 import Control.Category (Category)
 import qualified Control.Category as Category
 import Data.Semigroup as Sem
@@ -74,43 +74,43 @@ import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable
 
 -- |
--- This generalizes the list-based 'concat' function. 
--- 
+-- This generalizes the list-based 'concat' function.
+--
 msum' :: (MonadPlus m, Foldable t) => t (m a) -> m a
 msum' = Foldable.msum
 
--- | 
+-- |
 -- Fold a value into an arbitrary 'MonadPlus' type.
--- 
+--
 -- This function generalizes the 'toList' function.
--- 
+--
 mfold :: (MonadPlus m, Foldable t) => t a -> m a
 mfold = mfromList . Foldable.toList
 
--- | 
+-- |
 -- Translate a list to an arbitrary 'MonadPlus' type.
 --
 -- This function generalizes the 'listToMaybe' function.
--- 
+--
 mfromList :: MonadPlus m => [a] -> m a
 mfromList = Monad.msum . map return
 
--- | 
+-- |
 -- Translate maybe to an arbitrary 'MonadPlus' type.
--- 
+--
 -- This function generalizes the 'maybeToList' function.
--- 
+--
 mfromMaybe :: MonadPlus m => Maybe a -> m a
 mfromMaybe = maybe mzero return
 
--- | 
+-- |
 -- Convert a partial function to a function returning an arbitrary
 -- 'MonadPlus' type.
--- 
+--
 mreturn :: MonadPlus m => (a -> Maybe b) -> a -> m b
 mreturn f = mfromMaybe . f
 
--- | 
+-- |
 -- The 'partition' function takes a predicate a list and returns
 -- the pair of lists of elements which do and do not satisfy the
 -- predicate, respectively; i.e.,
@@ -118,86 +118,86 @@ mreturn f = mfromMaybe . f
 -- > partition p xs == (filter p xs, filter (not . p) xs)
 --
 -- This function generalizes the 'partition' function.
--- 
+--
 mpartition :: MonadPlus m => (a -> Bool) -> m a -> (m a, m a)
 mpartition p a = (mfilter p a, mfilter (not . p) a)
 
--- | 
+-- |
 -- Pass through @Just@ elements.
--- 
+--
 -- This function generalizes the 'catMaybes' function.
--- 
+--
 mcatMaybes :: MonadPlus m => m (Maybe a) -> m a
 mcatMaybes = (>>= mfromMaybe)
 
--- | 
+-- |
 -- Join list elements together.
--- 
+--
 -- This function generalizes the 'catMaybes' function.
--- 
+--
 mscatter :: MonadPlus m => m [b] -> m b
 mscatter = (>>= mfromList)
 
--- | 
+-- |
 -- Join foldable elements together.
--- 
+--
 -- This function generalizes the 'catMaybes' function.
--- 
+--
 mscatter' :: (MonadPlus m, Foldable t) => m (t b) -> m b
 mscatter' = (>>= mfold)
 
--- | 
+-- |
 -- Pass through @Left@ elements.
--- 
+--
 -- This function generalizes the 'lefts' function.
--- 
+--
 mlefts :: MonadPlus m => m (Either a b) -> m a
 mlefts = mcatMaybes . liftM l
     where
         l (Left a)  = Just a
         l (Right a) = Nothing
 
--- | 
+-- |
 -- Pass through @Right@ elements.
--- 
+--
 -- This function generalizes the 'rights' function.
--- 
+--
 mrights :: MonadPlus m => m (Either a b) -> m b
 mrights = mcatMaybes . liftM r
     where
         r (Left a)  = Nothing
         r (Right a) = Just a
 
--- | 
+-- |
 -- Separate @Left@ and @Right@ elements.
--- 
+--
 -- This function generalizes the 'partitionEithers' function.
--- 
+--
 mpartitionEithers :: MonadPlus m => m (Either a b) -> (m a, m b)
 mpartitionEithers a = (mlefts a, mrights a)
 
 
--- | 
+-- |
 -- Modify or discard a value.
--- 
+--
 -- This function generalizes the 'mapMaybe' function.
--- 
+--
 mmapMaybe :: MonadPlus m => (a -> Maybe b) -> m a -> m b
 mmapMaybe f = mcatMaybes . liftM f
 
--- | 
+-- |
 -- Modify, discard or spawn values.
--- 
+--
 -- This function generalizes the 'concatMap' function.
--- 
+--
 mconcatMap :: MonadPlus m => (a -> [b]) -> m a -> m b
 mconcatMap f = mscatter . liftM f
 
--- | 
+-- |
 -- Modify, discard or spawn values.
--- 
+--
 -- This function generalizes the 'concatMap' function.
--- 
+--
 mconcatMap' :: (MonadPlus m, Foldable t) => (a -> t b) -> m a -> m b
 mconcatMap' f = mscatter' . liftM f
 
@@ -219,13 +219,13 @@ predicate f x = case f x of
 
 -- |
 -- Convert a total function to a partial function.
---  
+--
 always :: (a -> b) -> a -> Maybe b
 always f = Just . f
 
 -- |
 -- Make a partial function that always rejects its input.
---  
+--
 never :: a -> Maybe c
 never = const Nothing
 
@@ -233,7 +233,7 @@ never = const Nothing
 -- Wrapper for partial functions with 'MonadPlus' instance.
 --
 newtype Partial a b = Partial { getPartial :: a -> Maybe b }
-    
+
 instance Functor (Partial r) where
     fmap f (Partial g) = Partial (fmap f . g)
 
@@ -268,5 +268,3 @@ instance Sem.Semigroup (Partial a b) where
 instance Monoid (Partial a b) where
     mempty  = mzero
     mappend = (<>)
-
-

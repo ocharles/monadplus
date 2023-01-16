@@ -1,4 +1,3 @@
-
 cabal-version:      >= 1.18
 name:               monadplus
 version:            1.4.3
@@ -6,29 +5,36 @@ author:             Hans Hoglund
 maintainer:         Hans Hoglund <hans@hanshoglund.se>
 license:            BSD3
 license-file:       COPYING
-synopsis:           Haskell98 partial maps and filters over MonadPlus. 
+synopsis:           Haskell98 partial maps and filters over MonadPlus.
 category:           Control
-tested-with:        GHC
 build-type:         Simple
 extra-doc-files:
     CHANGELOG.md
 
-description: 
+description:
     Filtering and folding over arbitrary `MonadPlus` instances.
 
     This package generalizes many common stream operations such as
     `filter`, `catMaybes` etc.
 
+tested-with:
+  GHC == 9.4.4
+  GHC == 9.2.5
+  GHC == 9.0.2
+  GHC == 8.10.7
+  GHC == 8.8.4
+  GHC == 8.6.5
+  GHC == 8.4.4
+
 source-repository head
   type:             git
   location:         git://github.com/hanshoglund/monadplus.git
-  
+
 library
     default-language: Haskell98
-    build-depends: 
+    build-depends:
         base >= 4.11 && < 5
     hs-source-dirs: src
     exposed-modules:
         Control.Applicative.Alternative
         Control.Monad.Plus
-    
