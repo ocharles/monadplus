@@ -1,4 +1,3 @@
-
 name:               monadplus
 version:            1.4.3
 cabal-version:      >= 1.10
@@ -33,7 +32,7 @@ source-repository head
 
 library
     default-language: Haskell98
-    build-depends: 
+    build-depends:
         base >= 4.11 && < 5
     hs-source-dirs: src
     exposed-modules:
